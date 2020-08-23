@@ -40,12 +40,11 @@ var mainWindow;
 		mainWindow.webContents.openDevTools();
 	}
 
-	mainWindow.once("ready-to-show", () => {
-		autoUpdater.checkForUpdatesAndNotify();
-		//mainWindow.webContents.send("update_available");
-	});
-
 })();
+
+app.on("ready", function()  {
+	autoUpdater.checkForUpdatesAndNotify();
+});
 
 app.on("window-all-closed", () => {
 	app.quit();

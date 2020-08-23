@@ -7,9 +7,9 @@ import "antd/dist/antd.css";
 
 // eslint-disable-next-line no-unused-vars
 import { SettingFilled, ExclamationCircleOutlined } from "@ant-design/icons";
-import { Tabs, Button, Popover, notification } from "antd";
+import { Tabs, Button, Popover, notification, Modal } from "antd";
 const { TabPane } = Tabs;
-
+const { confirm } = Modal;
 
 
 import NewPage from "../components/newPage";
@@ -45,7 +45,7 @@ class Home extends React.Component {
 				ipcRenderer.removeAllListeners("update_available");
 				//message.innerText = "A new update is available. Downloading now...";
 
-				notification["info"].open({
+				notification.open({
 					message: "A new update is available. Downloading now...",
 					icon: <ExclamationCircleOutlined  style={{ color: "#108ee9" }} />,
 				});
@@ -56,18 +56,19 @@ class Home extends React.Component {
 				//message.innerText = "Update Downloaded. It will be installed on restart. Restart now?";
 				
 				// Notification
-				const key = `open${Date.now()}`;
-				const btn = (
-					<Button type="primary" size="small" onClick={() => notification.close(key)}>
-						Restart
-					</Button>
-				);
-				notification.open({
-					message: "Update Downloaded. It will be installed on restart. Restart now?",
-					btn,
-					key,
-					onClose: () => ipcRenderer.send("restart_app"),
+				confirm({
+					title: "Update Downloaded. It will be installed on restart.",
+					icon: <ExclamationCircleOutlined />,
+					content: "Do you want to restart now?",
+					onOk() {
+						console.log("OK");
+						ipcRenderer.send("restart_app");
+					},
+					onCancel() {
+						console.log("Cancel");
+					},
 				});
+
 			});
 		}
 	}

@@ -394,7 +394,7 @@ class Crawler extends React.Component{
 						size="large"
 						onSearch={value => this.submit(value)}
 						loading={this.state.loading}
-						value="http://sleekdwellings.com/"
+						//value="http://sleekdwellings.com/"
 					/>
 
 					<Divider />
