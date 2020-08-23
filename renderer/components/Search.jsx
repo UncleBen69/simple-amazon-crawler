@@ -1,7 +1,7 @@
 import Papa from "papaparse";
 import React from "react";
 
-import { Divider, Typography, Input, Space, Button, Row, Col} from "antd";
+import { Divider, Typography, Input, Button, Row, Col} from "antd";
 
 
 const { Title } = Typography;
