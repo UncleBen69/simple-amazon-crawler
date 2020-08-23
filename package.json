@@ -5,9 +5,14 @@
 	"version": "2.0.0",
 	"author": "Vadim Alexeev",
 	"main": "app/background.js",
+	"repository": {
+		"type" : "git",
+		"url" : "https://github.com/UncleBen69/simple-amazon-crawler.git"
+	},
 	"scripts": {
 		"dev": "nextron",
 		"build": "nextron build",
+		"build:win64": "nextron build --win --x64",
 		"postinstall": "electron-builder install-app-deps",
 		"lint": "eslint renderer/**/*.jsx main/**/*.js"
 	},
