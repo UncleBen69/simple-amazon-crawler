@@ -2,7 +2,7 @@
 	"private": false,
 	"name": "simple-amazon-crawler",
 	"description": "Finds URLS on websites and expands Amazon Short URLS",
-	"version": "2.0.0",
+	"version": "1.0.0",
 	"author": "Vadim Alexeev",
 	"main": "app/background.js",
 	"repository": {
