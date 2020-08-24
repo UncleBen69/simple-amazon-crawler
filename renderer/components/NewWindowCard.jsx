@@ -22,7 +22,7 @@ const NewWindowCard = (props) => {
 	}
 	return(
 		<>
-			<Tilt scale={1.15} transitionSpeed={2500}>
+			<Tilt scale={1.15} transitionSpeed={2500} style={{margin: "0px 4vw"}}>
 				<div className="element" onClick={props.onClick}>
 					<Space direction="vertical" align="center" >
 						{icon}
@@ -35,10 +35,10 @@ const NewWindowCard = (props) => {
 			</Tilt>
 			<style jsx>{`
 				.element{
+					border-radius: 5px;
 					height: 40vh;
 					width: 20vw;
 					background-color: #202124;
-					margin: 0px 4vw;
 					box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 					text-align: center;
 					padding: 0 2vw;

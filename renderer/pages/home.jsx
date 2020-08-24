@@ -184,6 +184,9 @@ class Home extends React.Component {
 					body{
 						background-color: #252729;
 					}
+					.ant-typography{
+						color: #f1f3f4!important; 
+					}
 					.ant-tabs-tab{
 						background-color: #202124!important;
 						border-bottom-color: #323639!important;
