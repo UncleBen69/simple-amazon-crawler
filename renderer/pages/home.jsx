@@ -237,7 +237,9 @@ class Home extends React.Component {
 					.ant-tabs-nav-add > .anticon-plus > svg:hover{
 						fill: green;
 					}
-
+					.ant-table-filter-trigger > .anticon-search > svg{
+						fill: black!important;
+					}
 					.ant-popover-inner-content{
 						padding: 0!important;
 					}

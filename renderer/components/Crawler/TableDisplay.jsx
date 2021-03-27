@@ -67,7 +67,7 @@ class TableDisplay extends React.Component{
 							<Title level={2}>Done Crawling</Title>
 						</Tooltip>
 
-						<Button loading={this.props.loading} disabled={this.props.expanded || this.props.findAllURLS} type="primary" size="large" onClick={this.props.expandURLS}>Expand URLS</Button>
+						<Button loading={this.props.loading} disabled={this.props.expanded} type="primary" size="large" onClick={this.props.expandURLS}>Expand URLS</Button>
 						<Button loading={this.props.loading} size="large" onClick={this.downloadCSV}><CSVLink filename={`${this.props.host}_amazonlinks.csv`} data={this.props.amzurls} headers={headers}>Download CSV</CSVLink></Button>
 					</Space>
 
@@ -76,13 +76,11 @@ class TableDisplay extends React.Component{
 					<Title level={3}>{`${this.props.amzurls.length} URLS found on ${this.props.pageNumber} Pages`}</Title>
 
 					{/* If URLS are Amazon and Expanded */}
-					{this.props.expanded ? (
-						<>
-							<Divider />
+					
+					<Divider />
 
-							<Table tableLayout="fixed" dataSource={this.props.tags} columns={tagColumns} bordered={true} pagination={false} loading={this.props.loading} size="small"/>
-						</>
-					):(<> </>)}
+					<Table tableLayout="fixed" dataSource={this.props.tags} columns={tagColumns} bordered={true} pagination={false} loading={this.props.loading} size="small"/>
+					
 
 					{/* If finding all URLS */}
 					{this.props.findAllURLS ? (

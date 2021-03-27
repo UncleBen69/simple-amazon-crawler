@@ -14,9 +14,7 @@ class Search extends React.Component {
 			sqlfile: null,
 			completeSqlFile: null,
 			sqlfilename: null,
-			trackingCodes: null,
-			newtracking: null,
-			newtracking2: null,
+			trackingCodes: [],
 		};
 		this.updateData = this.updateData.bind(this);
 	}
@@ -195,6 +193,34 @@ class Search extends React.Component {
 		//console.log(this.state.csvfile);
 		//console.log(this.state.sqlfile);
 
+		let trackingInput = [];
+
+		for (let i = 0; i < this.state.trackingCodes.length+1; i++) {
+			//const element = this.state.trackingCodes[i];
+			
+			trackingInput.push(
+				<>
+					<Row>
+						<Col span={11}>
+							<Input
+								placeholder="Old ID"
+								name="old"
+							/>
+						</Col>
+						<Col span={1}>
+
+						</Col>
+						<Col span={11}>
+							<Input
+								placeholder="New ID"
+								name="new"
+							/>
+						</Col>
+					</Row>
+				</>
+			);
+		}
+
 		return (
 			<React.Fragment>  
 				<div className="container">
@@ -231,52 +257,12 @@ class Search extends React.Component {
 					<p />
 
 					<Title level={4}>Tracking IDs</Title>
-
-					<Row>
-						<Col span={11}>
-							<Input
-								placeholder="Old ID"
-								name="oldtracking"
-								value={this.state.oldtracking}
-								onChange={this.handleInputChange}
-							/>
-						</Col>
-						<Col span={1}>
-
-						</Col>
-						<Col span={11}>
-							<Input
-								placeholder="New ID"
-								name="newtracking"
-								value={this.state.newtracking}
-								onChange={this.handleInputChange}
-							/>
-						</Col>
-					</Row>
-
-					<p />
 					
-					<Row>
-						<Col span={11}>
-							<Input
-								placeholder="Old ID 2"
-								name="oldtracking2"
-								value={this.state.oldtracking2}
-								onChange={this.handleInputChange}
-							/>
-						</Col>
-						<Col span={1}>
-
-						</Col>
-						<Col span={11}>
-							<Input
-								placeholder="New ID 2"
-								name="newtracking2"
-								value={this.state.newtracking2}
-								onChange={this.handleInputChange}
-							/>
-						</Col>
-					</Row>
+					{trackingInput.map((data, index) => (
+						<React.Fragment key={index}>
+							{data}
+						</React.Fragment>
+					))}
 							
 					<p />
                         

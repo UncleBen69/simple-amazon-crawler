@@ -62,7 +62,7 @@ ipcMain.on("crawl::submit", (event, arg) => {
 ipcMain.on("expand::submit", (event, arg) => {
 	let data = JSON.parse(arg);
 
-	logger(mainWindow, `Expand requested on window ${data.id} for ${data.urls}`, "expander");
+	logger(mainWindow, `Expand requested on window ${data.id} for ${data.urls.length}`, "expander");
 
 	expand(event, data.urls, data.id, mainWindow);
 });

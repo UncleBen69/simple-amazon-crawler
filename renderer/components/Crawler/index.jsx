@@ -73,6 +73,15 @@ class Crawler extends React.Component{
 
 				console.log("Array of URLS: ", data.urls);
 
+				let arrayOfTags = [];
+
+				for (let i = 0; i < data.tags.length; i++) {
+					const element = data.tags[i];
+					arrayOfTags.push({
+						tag: element
+					});
+				}
+
 				if(data.searchedFor == false){
 					// Run for each URL
 					let uniqueDomains = new Set();
@@ -109,7 +118,8 @@ class Crawler extends React.Component{
 									this.setState({
 										uniqueDomainsArray,
 										crawling: "done",
-										amzurls: data.urls
+										amzurls: data.urls,
+										tags: arrayOfTags
 									});
 								}
 							}
@@ -119,7 +129,8 @@ class Crawler extends React.Component{
 				}else{
 					this.setState({
 						crawling: "done",
-						amzurls: data.urls
+						amzurls: data.urls,
+						tags: arrayOfTags
 					});
 				}
 			});

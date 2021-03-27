@@ -2,12 +2,12 @@
 	"private": true,
 	"name": "simple-amazon-crawler",
 	"description": "Finds URLS on websites and expands Amazon Short URLS",
-	"version": "1.0.3",
+	"version": "1.2.5",
 	"author": "Vadim Alexeev",
 	"main": "app/background.js",
 	"repository": {
-		"type" : "git",
-		"url" : "https://github.com/UncleBen69/simple-amazon-crawler.git"
+		"type": "git",
+		"url": "https://github.com/UncleBen69/simple-amazon-crawler.git"
 	},
 	"scripts": {
 		"dev": "nextron",
@@ -21,6 +21,8 @@
 		"electron-serve": "^1.0.0",
 		"electron-store": "^5.2.0",
 		"electron-updater": "^4.3.4",
+		"fastq": "^1.9.0",
+		"jsonpack": "^1.1.5",
 		"papaparse": "^5.2.0",
 		"react-csv": "^2.0.3",
 		"react-highlight-words": "^0.16.0",

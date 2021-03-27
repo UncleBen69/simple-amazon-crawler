@@ -3,21 +3,28 @@ import { logger } from "./index";
 
 var Crawler = require("simplecrawler");
 var cheerio = require("cheerio");
+var URL = require("url");
+
 
 export default function startCrawl(event, url, findURLS, id, window) {
+	var { crawlerSettings } = require("../../settings.json");
+
+	logger(window, `${id} Settings: ${JSON.stringify(crawlerSettings)}`, "crawler");
+	
 	var crawler = new Crawler(url);
 
 	var amazon_urls = new Set();
+	let amazon_tags = new Set();
 	var url_found = [];
 
 	// Settings
-	crawler.stripQuerystring = true;
-	crawler.userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Safari/537.36";
-	crawler.respectRobotsTxt = false;
+	crawler.stripQuerystring = crawlerSettings.stripQuerystring;
+	crawler.userAgent = crawlerSettings.userAgent;
+	crawler.respectRobotsTxt = crawlerSettings.respectRobotsTxt;
 	
 
 	crawler.on("crawlstart", function () {
-		logger(window, `Crawl started on ${url} for window ${id}`, "crawler");
+		logger(window, `${id} Crawl started on ${url}`, "crawler");
 
 		let reply = {
 			url,
@@ -30,9 +37,9 @@ export default function startCrawl(event, url, findURLS, id, window) {
 		//console.log("fetchStart");
 	});
 
-	crawler.on("fetchcomplete", function (queueItem, responseBuffer, response) {
-		logger(window, `Crawl on ${id} recieved ${queueItem.url} (${responseBuffer.length} bytes)`, "crawler");
-		logger(window, `Resource type of ${response.headers["content-type"]}`, "crawler");
+	crawler.on("fetchcomplete", function (queueItem, responseBuffer) {
+		logger(window, `${id} Crawled ${queueItem.url} (${responseBuffer.length} bytes)`, "crawler");
+		//logger(window, `Resource type of ${response.headers["content-type"]}`, "crawler");
 
 		let reply = {
 			id,
@@ -42,7 +49,7 @@ export default function startCrawl(event, url, findURLS, id, window) {
 		event.reply("crawl::foundUrl", JSON.stringify(reply));
 	});
 	crawler.on("complete", function () {
-		logger(window, `Completed Crawl on ${id} ${url}`, "crawler");
+		logger(window, `${id} Completed Crawl ${url}`, "crawler");
 
 		//console.log([...amazon_urls]);
 		let fixedFoundArray = [];
@@ -56,12 +63,6 @@ export default function startCrawl(event, url, findURLS, id, window) {
 				expanded: "None",
 				foundOn: [],
 			});
-			/*
-			console.log(
-				`Running for: ${element}, current array looks like`,
-				fixedFoundArray
-			);
-			*/
 			for (let x = 0; x < url_found.length; x++) {
 				if (url_found[x].url === element) {
 					// NOT YET Check if this URL's already been added
@@ -76,6 +77,7 @@ export default function startCrawl(event, url, findURLS, id, window) {
 			url,
 			urls: fixedFoundArray,
 			searchedFor: findURLS,
+			tags: [...amazon_tags],
 		};
 		event.reply("crawl::complete", JSON.stringify(reply));
 	});
@@ -98,8 +100,10 @@ export default function startCrawl(event, url, findURLS, id, window) {
 
 			//console.log(element);
 
-			// Check if finding all URLS
+			// Add tag to set
+			amazon_tags.add(URL.parse(element, true).query.tag);
 
+			// Check if finding all URLS
 			if (findURLS === false) {
 				// Add to set
 				amazon_urls.add(element);
@@ -136,7 +140,7 @@ export default function startCrawl(event, url, findURLS, id, window) {
 		let data = JSON.parse(arg);
 
 		if(data.id === id){
-			logger(window, `Window ${id} closed so crawler halting`, "crawler");
+			logger(window, `${id} Window closed so crawler halting`, "crawler");
 
 			crawler.stop();
 		}
