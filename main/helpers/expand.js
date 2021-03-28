@@ -1,8 +1,11 @@
-
-import ExpanderWorker from "!!raw-loader!../../expand-worker.js";
-
 import { logger } from "./index";
 const { Worker } = require("worker_threads");
+
+const isProd = process.env.NODE_ENV === "production";
+
+// eslint-disable-next-line no-unused-vars
+const fs = require("fs");
+const path = require("path");
 
 const { performance } = require("perf_hooks");
 
@@ -94,14 +97,32 @@ function wait(newurls, callback){
 }
 
 function worker (options, cb) {
-	const worker = new Worker(ExpanderWorker, { workerData: options, eval: true});
+	let FilePath;
+
+	options.isProd = isProd;
+
+	if(isProd){
+		FilePath = path.resolve(process.resourcesPath, "..", "expand-worker.js");
+	}else{
+		// Working
+		FilePath = path.resolve(process.cwd(), "expand-worker.js");
+	}
+
+	//logger(GlobalWindow, process.cwd(), "expander");
+
+	logger(GlobalWindow, FilePath, "expander");
+	const workerContents = fs.readFileSync(FilePath, { encoding: "utf8" });
+
+	//logger(GlobalWindow, workerContents, "expander");
+
+	const worker = new Worker(workerContents, { workerData: options, eval: true});
 
 	worker.on("message", (message)=>{
 		//console.log(message);
 		if(message.type == "completed"){
 			const { data } = message;
 
-			logger(GlobalWindow, `${options.req_id} Expand on ${options.uri} found ${data.tag}`, "expander");
+			logger(GlobalWindow, `${options.req_id} Expand on ${options.uri} found ${data}`, "expander");
 	
 
 			cb(null, {
@@ -116,7 +137,7 @@ function worker (options, cb) {
 		}
 	});
 	worker.on("error", (err)=>{
-		logger(GlobalWindow, `${options.req_id}'s Worker failed on ${options.uri}, error: ${err.error}`, "expander");
+		logger(GlobalWindow, `${options.req_id}'s Worker failed on ${options.uri}, error: ${JSON.stringify(err)}`, "expander");
 
 		cb(null, null);
 	});

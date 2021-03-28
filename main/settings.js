@@ -23,7 +23,7 @@ export default new Store({
 			downloadUnsupported: false 
 		},
 		expandSettings: {
-			parallel: 50
+			parallel: 10
 		}
 	}
 });
