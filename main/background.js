@@ -52,7 +52,7 @@ var mainWindow;
 	}
 })();
 
-app.on("ready-to-show", function()  {
+app.on("ready", function()  {
 	autoUpdater.checkForUpdatesAndNotify();
 });
 
