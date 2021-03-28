@@ -25,14 +25,13 @@ class Home extends React.Component {
 		this.newTabIndex = 0;
 
 		this.state = {
-			logging: false,
+			logging: null,
 			activeKey: 1,
 			panes: [
 				{
 					title: "New Page",
 					content: <NewPage titleChange={this.titleChange} id="1" />,
 					key: "1",
-
 				}
 			],
 		};
@@ -40,6 +39,12 @@ class Home extends React.Component {
 	
 	componentDidMount() {
 		if (ipcRenderer) {
+			
+			// Debug Settings
+			const settings = JSON.parse(ipcRenderer.sendSync("settings::get"));
+			this.setState({
+				logging: settings.generalSettings.debug,
+			});
 
 			ipcRenderer.on("update_available", () => {
 				ipcRenderer.removeAllListeners("update_available");
@@ -157,7 +162,16 @@ class Home extends React.Component {
 					
 					onEdit={this.onEdit}
 					tabBarExtraContent={
-						<Popover content={<Settings logging={this.state.logging} changeLogging={this.changeLogging} />} title="Settings" trigger="click" placement="bottomRight">
+						<Popover 
+							content={
+								<Settings 
+									changeLogging={this.changeLogging} 
+								/>
+							} 
+							title="Settings" 
+							trigger="click" 
+							placement="bottomRight"
+						>
 							<Button type="primary" shape="circle" icon={<SettingFilled />} />
 						</Popover>
 					}
@@ -174,6 +188,9 @@ class Home extends React.Component {
 				
 
 				<style global jsx>{`
+					.ant-tabs-extra-content{
+						margin-right: 5px;
+					}
 					.container {
 						position: fixed;
 						top: 50%;

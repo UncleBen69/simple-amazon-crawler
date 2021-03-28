@@ -19,7 +19,7 @@ class DebugConsole extends React.Component{
 			ipcRenderer.on("debug::log", (event, arg) => {
 				let data = JSON.parse(arg);
 
-				console.log(data);
+				//console.log(data);
 				
 				const {text, from} = data;
 
@@ -29,7 +29,7 @@ class DebugConsole extends React.Component{
 					{text,from},
 					...oldLog
 				];
-				console.log(newArray);
+				//console.log(newArray);
 				
 				this.setState({
 					logs: newArray,

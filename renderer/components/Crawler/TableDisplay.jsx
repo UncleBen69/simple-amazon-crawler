@@ -58,13 +58,13 @@ class TableDisplay extends React.Component{
 		return(
 			<>
 				<div className="bodyPadding">
-					<Space size="middle" align="center">
+					<Space size="middle" align="center" >
 						<Tooltip placement="bottom" title="Click to reset">
 							<Button type="primary" icon={<CloseOutlined />} onClick={this.props.reset}/>
 						</Tooltip>
 						
 						<Tooltip placement="bottom" title={`Crawled: ${this.props.url}`}>
-							<Title level={2}>Done Crawling</Title>
+							<Title level={2} style={{marginBottom: 0}}>Done Crawling</Title>
 						</Tooltip>
 
 						<Button loading={this.props.loading} disabled={this.props.expanded} type="primary" size="large" onClick={this.props.expandURLS}>Expand URLS</Button>

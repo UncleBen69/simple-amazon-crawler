@@ -1,68 +1,123 @@
+const { app } = require("electron");
+const fs = require("fs");
+
 var rp = require("request-promise");
 var url = require("url");
 
 import { logger } from "./index";
 
+let GlobalWindow;
+let GlobalID;
+
 export default async function expand(event, urls, id, window) {
-	logger(window, `Expand for ${id} urls: ${urls}`, "expander");
+	var { expandSettings } = JSON.parse(fs.readFileSync(`${app.getPath("userData")}/settings.json`));
+	
+	GlobalWindow = window;
+	GlobalID = id;
+	logger(GlobalWindow, `${GlobalID} Expand for urls: ${urls.length}`, "expander");
+	var queue = require("fastq")(worker, expandSettings.parallel);
 
 	let newurls = urls;
-	var ps = [];
+	let amazon_tags = new Set();
 
 	for (let i = 0; i < newurls.length; i++) {
 		// Checking if string is valid
-		if (newurls[i].url.charAt(0) == "#") continue;
-		if (newurls[i].url.charAt(0) == "/") continue;
-		if (newurls[i].url.includes("javascript:")) continue;
 
 		let options = {
 			uri: newurls[i].url,
 			resolveWithFullResponse: true,
 			simple: false,
+			req_id: id,
+			req_key: i,
 		};
 
-		ps.push(rp(options));
+		// Check if valid URL
+		if(validURL(options.uri)){
+			queue.push(options, function (err, result) {
+				if (err) { throw err; }
+
+				newurls[i].completed = true;
+				newurls[i].expanded = result.expanded;
+
+				amazon_tags.add(result.tag);
+			});
+		}else{
+			logger(GlobalWindow, `${GlobalID} URL ${options.uri} is invalid not expanding`, "expander");
+			newurls[i].completed = true;
+			newurls[i].expanded = null;
+		}
+
+		// On last iteration
+		if (i == newurls.length - 1) {
+			logger(GlobalWindow, `${GlobalID} Queue = ${queue.getQueue().length}`, "expander");
+			wait(newurls, ()=>{
+				let reply = {
+					id,
+					urls: newurls,
+					tags: [...amazon_tags],
+				};
+				logger(GlobalWindow, `${GlobalID} Completed expand found ${[...amazon_tags].length} tags`, "expander");
+
+				event.reply("expand::complete", JSON.stringify(reply));
+			});
+		}
+	}
+}
+function wait(newurls, callback){
+	let result = true;
+	for (let i = 0; i < newurls.length; i++) {
+		if (newurls[i].completed !== true) {
+			//console.log(newurls[i]);
+			result = false;
+			break;
+		}
 	}
 
-	var amazon_tags = new Set();
+	//console.log(result);
+	if(result == false){
+		setTimeout(wait, 100, newurls, callback);
+	/*
+	if (queue.getQueue().length !== 0){
+		setTimeout(wait,100, id, newurls);
 
-	Promise.all(ps)
-		.then((results) => {
-			logger(window, `Expand ${id} Results Length: ${results.length}`, "expander");
-			for (let x = 0; x < results.length; x++) {
-				const element = results[x];
-				// Process html...
-				let expanded = element.request.uri.href;
+	*/
+	} else {
+		// Return Data
+		callback();
+	}
+}
 
-				newurls[x].expanded = expanded;
+function worker (options, cb) {
+	rp(options)
+		.then((result) => {
+			let expanded = result.request.uri.href;
+			let tag = url.parse(expanded, true).query.tag;
+		
 
-				//console.log(expanded);
+			logger(GlobalWindow, `${options.req_id} Expand on ${options.uri} found ${tag}`, "expander");
 
-				var url_parts = url.parse(expanded, true);
-
-				logger(window, `Expand for ${id} found ${url_parts.query.tag}`, "expander");
-
-				amazon_tags.add(url_parts.query.tag);
-
-				if (x == newurls.length - 1) {
-					logger(window, `Completed expand for ${id}`, "expander");
-					let reply = {
-						id,
-						urls: newurls,
-						tags: [...amazon_tags],
-					};
-					event.reply("expand::complete", JSON.stringify(reply));
-				}
-			}
+			cb(null, {expanded, tag});
+			return;
 		})
-		.catch((err) => () => {
-			logger(window, `Expand error on ${id}. Error: ${err}`, "expander");
+		.catch((err) => {
+			// Crawling failed...
+			logger(GlobalWindow, `${options.req_id}'s Expand failed on ${options.uri}, error: ${err.message}`, "expander");
 
-			let reply = {
-				type: "reply",
-				message: "expand error",
-				error: err,
-			};
-			event.reply("data", JSON.stringify(reply));
-		}); // First rejected promise
+			cb(null, null);
+			return;
+		});
+}
+
+function validURL(str) {
+	if (str.charAt(0) == "#") return false;
+	if (str.charAt(0) == "/") return false;
+	if (str.includes("javascript:")) return false;
+
+	try {
+		new URL(str);
+	} catch (_) {
+		return false;  
+	}
+	
+	return true;
 }

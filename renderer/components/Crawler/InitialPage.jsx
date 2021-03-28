@@ -152,7 +152,7 @@ class InitialPage extends React.Component {
 				</div>
 
 				<style global jsx>{`
-					.ant-divider{
+					.container .ant-divider{
 						border-top: 1px solid #f1f3f4!important;
 					}
 					.ant-checkbox-wrapper > span{

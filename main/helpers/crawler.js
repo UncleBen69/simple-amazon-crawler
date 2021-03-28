@@ -1,4 +1,5 @@
-const { ipcMain } = require("electron");
+const { app, ipcMain } = require("electron");
+const fs = require("fs");
 import { logger } from "./index";
 
 var Crawler = require("simplecrawler");
@@ -7,7 +8,7 @@ var URL = require("url");
 
 
 export default function startCrawl(event, url, findURLS, id, window) {
-	var { crawlerSettings } = require("../../settings.json");
+	var { crawlerSettings } = JSON.parse(fs.readFileSync(`${app.getPath("userData")}/settings.json`));
 
 	logger(window, `${id} Settings: ${JSON.stringify(crawlerSettings)}`, "crawler");
 	
@@ -21,7 +22,9 @@ export default function startCrawl(event, url, findURLS, id, window) {
 	crawler.stripQuerystring = crawlerSettings.stripQuerystring;
 	crawler.userAgent = crawlerSettings.userAgent;
 	crawler.respectRobotsTxt = crawlerSettings.respectRobotsTxt;
-	
+	crawler.maxConcurrency = crawlerSettings.maxConcurrency;
+	crawler.scanSubdomains = crawlerSettings.scanSubdomains;
+	crawler.interval = crawlerSettings.interval; 
 
 	crawler.on("crawlstart", function () {
 		logger(window, `${id} Crawl started on ${url}`, "crawler");

@@ -16,7 +16,8 @@ const Console = (props) => {
 					color: #f1f3f4;
 					display: block;
 
-					white-space:nowrap
+					white-space: normal;
+
 				}
 				.debugTextContainer > span{
 					display: block;
