@@ -33,6 +33,8 @@ class Crawler extends React.Component{
 
 			crawlRunTime: null,
 			expandRunTime: null,
+
+			expandQueueLength: null,
 		};
 	}
 
@@ -87,7 +89,8 @@ class Crawler extends React.Component{
 					if(element == null) continue;
 
 					arrayOfTags.push({
-						tag: element
+						tag: element,
+						key: i,
 					});
 				}
 
@@ -165,7 +168,8 @@ class Crawler extends React.Component{
 					if(element == null) continue;
 
 					arrayOfTags.push({
-						tag: element
+						tag: element,
+						key: i,
 					});
 				}
 
@@ -196,6 +200,29 @@ class Crawler extends React.Component{
 				});
 				this.setState({
 					loading: false,
+				});
+			});
+			
+			ipcRenderer.on("expand::queueUpdate", (event, arg) => {
+				let data = JSON.parse(arg);
+
+				if(data.id !== this.props.id) return;
+				
+				console.log(data);
+
+				const currentLength = this.state.expandQueueLength !== null? this.state.expandQueueLength : 1 ;
+
+				let newNum;
+
+				if(data.type == "added"){
+					newNum = currentLength + 1;
+
+				}else if(data.type == "removed"){
+					newNum = currentLength - 1;
+				}
+
+				this.setState({
+					expandQueueLength: newNum
 				});
 			});
 		}
@@ -273,6 +300,7 @@ class Crawler extends React.Component{
 			host: null,
 			crawlRunTime: null,
 			expandRunTime: null,
+			expandQueueLength: null,
 		});	
 	}
 
@@ -313,6 +341,7 @@ class Crawler extends React.Component{
 
 					crawlRunTime={this.state.crawlRunTime}
 					expandRunTime={this.state.expandRunTime}
+					expandQueueLength={this.state.expandQueueLength}
 
 					reset={this.reset}
 					expandURLS={this.expandURLS}

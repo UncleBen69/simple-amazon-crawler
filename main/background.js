@@ -126,7 +126,6 @@ ipcMain.on("app::version", (event) => {
 });
 
 // Autoupdater
-
 ipcMain.on("restart_app", () => {
 	autoUpdater.quitAndInstall();
 });
@@ -140,9 +139,6 @@ autoUpdater.on("update-downloaded", () => {
 });
 
 
-
-
-// TODO: Create default settings file if doesn't exist
 function CheckSettingFile(Callback){
 	let CreateSettingFile;
 	logger(mainWindow, "Checking Setting File", "settings");

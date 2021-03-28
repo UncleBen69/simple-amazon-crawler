@@ -138,8 +138,8 @@ class InitialPage extends React.Component {
 						onSearch={value => this.submit(value)}
 						loading={this.props.loading}
 						defaultValue={this.props.url}
-						value="https://maternityglow.com/"
-						//value="https://broinsider.com/"
+						//value="https://maternityglow.com/"
+						value="https://broinsider.com/"
 					/>
 
 					<Divider />

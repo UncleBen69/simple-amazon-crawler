@@ -1,3 +1,5 @@
+import electron from "electron";
+
 import React from "react";
 
 import { CSVLink } from "react-csv";
@@ -21,20 +23,33 @@ import { CloseOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
 
-
+const ipcRenderer = electron.ipcRenderer || false;
 class TableDisplay extends React.Component{
 	constructor(props){
 		super(props);
 
 		this.state = {
 			time: null,
+			rowsPerPage: 10
 		};
 	}
 
-
 	componentDidMount() {
+		if (ipcRenderer) {
+			// Row Settings
+			const settings = JSON.parse(ipcRenderer.sendSync("settings::get"));
+			console.log(settings.generalSettings.rowsPerPage, "Rows");
+			this.setState({
+				rowsPerPage: settings.generalSettings.rowsPerPage,
+			});
+		}
+	}
+
+	startExpand = ()=> {
+		this.props.expandURLS();
+
 		this.interval = setInterval(() => {
-			
+			console.log("Expand Timer Running");
 			// Check if finished expanding
 			if(this.props.expanded) clearInterval(this.interval);
 
@@ -66,6 +81,9 @@ class TableDisplay extends React.Component{
 		];
 		let headers;
 		if(this.props.expanded){
+			// Stop timer
+			clearInterval(this.interval);
+
 			headers = [
 				{ label: "URL", key: "url" },
 				{ label: "Expanded", key: "expanded" }
@@ -75,7 +93,6 @@ class TableDisplay extends React.Component{
 				{ label: "URL", key: "url" },
 			];
 		}
-
 
 		return(
 			<>
@@ -91,7 +108,7 @@ class TableDisplay extends React.Component{
 									<Title level={2} style={{marginBottom: 0}}>Done Crawling</Title>
 								</Tooltip>
 
-								<Button loading={this.props.loading} disabled={this.props.expanded} type="primary" size="large" onClick={this.props.expandURLS}>Expand URLS</Button>
+								<Button loading={this.props.loading} disabled={this.props.expanded} type="primary" size="large" onClick={this.startExpand}>Expand URLS</Button>
 								<Button loading={this.props.loading} size="large" onClick={this.downloadCSV}><CSVLink filename={`${this.props.host}_amazonlinks.csv`} data={this.props.amzurls} headers={headers}>Download CSV</CSVLink></Button>
 							</Space>
 						</Col>
@@ -141,7 +158,7 @@ class TableDisplay extends React.Component{
 
 					<Divider />
 
-					<CustomTable data={this.props.amzurls} loading={this.props.loading} expanded={this.props.expanded}/>
+					<CustomTable data={this.props.amzurls} loading={this.props.loading} expanded={this.props.expanded} rowsPerPage={this.state.rowsPerPage} />
 
 					
 				</div>

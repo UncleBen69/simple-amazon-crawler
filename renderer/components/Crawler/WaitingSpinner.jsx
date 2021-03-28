@@ -52,9 +52,12 @@ class WaitingSpinner extends React.Component {
 			});
 		}
 
-		this.interval = setInterval(() => this.setState({ 
-			time: Date.now() - this.props.crawlRunTime,
-		}), 50);
+		this.interval = setInterval(() => {
+			console.log("Crawl Timer Running");
+			this.setState({ 
+				time: Date.now() - this.props.crawlRunTime,
+			});
+		}, 50);
 	}
 
 	componentWillUnmount() {

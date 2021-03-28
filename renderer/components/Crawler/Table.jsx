@@ -113,7 +113,7 @@ class CustomTable extends React.Component {
 				columns={columns} 
 				dataSource={this.props.data} 
 				bordered={true} 
-				pagination={false} 
+				pagination={this.props.rowsPerPage == 0 ? false : {pageSize: this.props.rowsPerPage}} 
 				loading={this.props.loading}
 				expandable={{
 					expandedRowRender: record => (

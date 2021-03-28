@@ -11,8 +11,8 @@
 	},
 	"scripts": {
 		"dev": "nextron",
-		"build": "nextron build --win --x64",
-		"release": "nextron build --win --x64",
+		"build": "nextron build --win --x64 --publish never",
+		"release": "nextron build --win --x64 --publish always",
 		"postinstall": "electron-builder install-app-deps",
 		"lint": "eslint renderer/**/*.jsx main/**/*.js"
 	},

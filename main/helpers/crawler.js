@@ -82,14 +82,13 @@ export default function startCrawl(event, url, findURLS, id, window) {
 
 		endTime = performance.now();
 
-
 		let reply = {
 			id,
 			url,
 			urls: fixedFoundArray,
 			searchedFor: findURLS,
 			tags: [...amazon_tags],
-			runTime: (endTime - startTime)
+			runTime: (endTime - startTime),
 		};
 		event.reply("crawl::complete", JSON.stringify(reply));
 	});

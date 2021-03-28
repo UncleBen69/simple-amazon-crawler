@@ -2,7 +2,8 @@
     "generalSettings": {
         "debug": false,
         "openDevTools": false,
-        "installReactDevTools": false
+        "installReactDevTools": false,
+        "rowsPerPage": 100 
     },
     "crawlerSettings": {
         "stripQuerystring": true,

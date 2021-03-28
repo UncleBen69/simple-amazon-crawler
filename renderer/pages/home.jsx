@@ -244,10 +244,11 @@ class Home extends React.Component {
 					.ant-tabs-nav-wrap .anticon > svg {
 						fill: rgba(255, 255, 255, .7);
 					}
+					/*
 					.ant-tabs-tabpane .anticon > svg {
 						fill: rgba(255, 255, 255, .7);
 					}
-
+					*/
 					.ant-tabs-nav-wrap .anticon-close > svg:hover{
 						fill: red;
 					}

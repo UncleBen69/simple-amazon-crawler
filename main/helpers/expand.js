@@ -1,15 +1,13 @@
-const { app } = require("electron");
+const { app  } = require("electron");
 const fs = require("fs");
-
-var rp = require("request-promise");
-var url = require("url");
+const { Worker } = require("worker_threads");
 
 import { logger } from "./index";
 
 const { performance } = require("perf_hooks");
 
 
-let GlobalWindow;
+var GlobalWindow;
 
 export default async function expand(event, urls, id, window) {
 	let startTime, endTime;
@@ -18,6 +16,7 @@ export default async function expand(event, urls, id, window) {
 	var { expandSettings } = JSON.parse(fs.readFileSync(`${app.getPath("userData")}/settings.json`));
 	
 	GlobalWindow = window;
+
 
 	logger(GlobalWindow, `${id} Expand for urls: ${urls.length}`, "expander");
 	var queue = require("fastq")(worker, expandSettings.parallel);
@@ -96,24 +95,38 @@ function wait(newurls, callback){
 }
 
 function worker (options, cb) {
-	rp(options)
-		.then((result) => {
-			let expanded = result.request.uri.href;
-			let tag = url.parse(expanded, true).query.tag;
-		
+	const worker = new Worker("./main/expand-worker.js", { workerData: options });
 
-			logger(GlobalWindow, `${options.req_id} Expand on ${options.uri} found ${tag}`, "expander");
+	worker.on("message", (message)=>{
+		if(message.type == "completed"){
+			const { data } = message;
 
-			cb(null, {expanded, tag});
-			return;
-		})
-		.catch((err) => {
-			// Crawling failed...
-			logger(GlobalWindow, `${options.req_id}'s Expand failed on ${options.uri}, error: ${err.message}`, "expander");
+			logger(GlobalWindow, `${options.req_id} Expand on ${options.uri} found ${data.tag}`, "expander");
+	
+
+			cb(null, {
+				expanded: data.expanded, 
+				tag: data.tag,
+			});
+		}else{
+			// Error in request
+			logger(GlobalWindow, `${options.req_id}'s Expand failed on ${options.uri}, error: ${message.error}`, "expander");
 
 			cb(null, null);
-			return;
-		});
+		}
+	});
+	worker.on("error", (err)=>{
+		logger(GlobalWindow, `${options.req_id}'s Worker failed on ${options.uri}, error: ${err.error}`, "expander");
+
+		cb(null, null);
+	});
+
+	worker.on("exit", (code) => {
+		if (code !== 0){
+			//console.log(`Error, exit code: ${code}`);
+			logger(GlobalWindow, `${options.req_id}'s Worker failed on ${options.uri}, error code: ${code}`, "expander");
+		}
+	}); 
 }
 
 function validURL(str) {

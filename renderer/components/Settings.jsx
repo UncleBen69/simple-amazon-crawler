@@ -1,10 +1,12 @@
 import electron from "electron";
+const os = require("os");
+
 import AwesomeDebouncePromise from "awesome-debounce-promise";
 
 import React from "react";
 
 import { Switch, Collapse, Row, Col, Input, Button, Space, Tooltip, InputNumber, Modal } from "antd";
-import { CloseOutlined, CheckOutlined, ReloadOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import { CloseOutlined, CheckOutlined, ReloadOutlined, ExclamationCircleOutlined, DashboardOutlined } from "@ant-design/icons";
 
 const { Panel } = Collapse;
 const { confirm } = Modal;
@@ -122,6 +124,21 @@ class Settings extends React.Component{
 									onChange={()=> this.changeSetting("generalSettings", "debug")}
 								/>
 							</Col>
+
+							<Col flex={2}>
+								Table Rows Per Page:
+							</Col>
+							<Col flex={"auto"} className="holdright">
+								<Tooltip title="Setting this to 0 will disable pagination" placement="topRight">
+									<InputNumber
+										disabled={!settings}
+										min={0}
+										value={settings !== null ? settings.generalSettings.rowsPerPage : null}
+										onChange={(number)=> this.changeSetting("generalSettings", "rowsPerPage", undefined, number)}
+									/>
+								</Tooltip>
+							</Col>
+
 							<p className="text-warning">These Settings Require A Restart To Fully Apply:</p>
 							<Col flex={2}>
 								Open Dev Tools At Launch:
@@ -285,12 +302,34 @@ class Settings extends React.Component{
 								Parallel Workers:
 							</Col>
 							<Col flex={"auto"} className="holdright">
-								<InputNumber
-									disabled={!settings}
-									min={1}
-									value={settings !== null ? settings.expandSettings.parallel : null}
-									onChange={(number)=> this.changeSetting("expandSettings", "parallel", undefined, number)}
-								/>
+								<Space>
+									<InputNumber
+										disabled={!settings}
+										min={1}
+										value={settings !== null ? settings.expandSettings.parallel : null}
+										onChange={(number)=> this.changeSetting("expandSettings", "parallel", undefined, number)}
+									/>
+
+									<Tooltip title="Set to best amount for hardware" placement="topRight">
+										<Button 
+											loading={!settings}
+											type="primary" 
+											icon={<DashboardOutlined />} 
+											onClick={() => {
+												// Get threads
+												const cpuCount = os.cpus().length;
+
+												this.changeSetting(
+													"expandSettings", 
+													"parallel", 
+													undefined, 
+													cpuCount - 2
+												);
+												
+											}}
+										/>
+									</Tooltip>
+								</Space>
 							</Col>
 
 						</Row>
