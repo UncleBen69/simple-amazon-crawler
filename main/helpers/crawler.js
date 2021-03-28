@@ -5,9 +5,13 @@ import { logger } from "./index";
 var Crawler = require("simplecrawler");
 var cheerio = require("cheerio");
 var URL = require("url");
+const { performance } = require("perf_hooks");
 
 
 export default function startCrawl(event, url, findURLS, id, window) {
+	let startTime, endTime;
+	
+	startTime = performance.now();
 	var { crawlerSettings } = JSON.parse(fs.readFileSync(`${app.getPath("userData")}/settings.json`));
 
 	logger(window, `${id} Settings: ${JSON.stringify(crawlerSettings)}`, "crawler");
@@ -25,6 +29,7 @@ export default function startCrawl(event, url, findURLS, id, window) {
 	crawler.maxConcurrency = crawlerSettings.maxConcurrency;
 	crawler.scanSubdomains = crawlerSettings.scanSubdomains;
 	crawler.interval = crawlerSettings.interval; 
+	crawler.downloadUnsupported  = crawlerSettings.downloadUnsupported; 
 
 	crawler.on("crawlstart", function () {
 		logger(window, `${id} Crawl started on ${url}`, "crawler");
@@ -75,12 +80,16 @@ export default function startCrawl(event, url, findURLS, id, window) {
 			}
 		}
 
+		endTime = performance.now();
+
+
 		let reply = {
 			id,
 			url,
 			urls: fixedFoundArray,
 			searchedFor: findURLS,
 			tags: [...amazon_tags],
+			runTime: (endTime - startTime)
 		};
 		event.reply("crawl::complete", JSON.stringify(reply));
 	});

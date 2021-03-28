@@ -6,15 +6,20 @@ var url = require("url");
 
 import { logger } from "./index";
 
+const { performance } = require("perf_hooks");
+
+
 let GlobalWindow;
-let GlobalID;
 
 export default async function expand(event, urls, id, window) {
+	let startTime, endTime;
+
+	startTime = performance.now();
 	var { expandSettings } = JSON.parse(fs.readFileSync(`${app.getPath("userData")}/settings.json`));
 	
 	GlobalWindow = window;
-	GlobalID = id;
-	logger(GlobalWindow, `${GlobalID} Expand for urls: ${urls.length}`, "expander");
+
+	logger(GlobalWindow, `${id} Expand for urls: ${urls.length}`, "expander");
 	var queue = require("fastq")(worker, expandSettings.parallel);
 
 	let newurls = urls;
@@ -42,21 +47,24 @@ export default async function expand(event, urls, id, window) {
 				amazon_tags.add(result.tag);
 			});
 		}else{
-			logger(GlobalWindow, `${GlobalID} URL ${options.uri} is invalid not expanding`, "expander");
+			logger(GlobalWindow, `${id} URL ${options.uri} is invalid not expanding`, "expander");
 			newurls[i].completed = true;
 			newurls[i].expanded = null;
 		}
 
 		// On last iteration
 		if (i == newurls.length - 1) {
-			logger(GlobalWindow, `${GlobalID} Queue = ${queue.getQueue().length}`, "expander");
+			logger(GlobalWindow, `${id} Queue = ${queue.getQueue().length}`, "expander");
 			wait(newurls, ()=>{
+				endTime = performance.now();
+
 				let reply = {
 					id,
 					urls: newurls,
 					tags: [...amazon_tags],
+					runTime: (endTime - startTime)
 				};
-				logger(GlobalWindow, `${GlobalID} Completed expand found ${[...amazon_tags].length} tags`, "expander");
+				logger(GlobalWindow, `${id} Completed expand found ${[...amazon_tags].length} tags`, "expander");
 
 				event.reply("expand::complete", JSON.stringify(reply));
 			});

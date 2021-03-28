@@ -167,6 +167,7 @@ function CheckSettingFile(Callback){
 					if(typeof settings.crawlerSettings.maxConcurrency !== "number") CreateSettingFile = true;
 					if(typeof settings.crawlerSettings.scanSubdomains !== "boolean") CreateSettingFile = true;
 					if(typeof settings.crawlerSettings.interval !== "number") CreateSettingFile = true;
+					if(typeof settings.crawlerSettings.downloadUnsupported !== "boolean") CreateSettingFile = true;
 
 					if(typeof settings.expandSettings.parallel !== "number") CreateSettingFile = true;
 				

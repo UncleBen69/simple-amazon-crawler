@@ -255,7 +255,7 @@ class Home extends React.Component {
 						fill: green;
 					}
 					.ant-table-filter-trigger > .anticon-search > svg{
-						fill: black!important;
+						fill: rgba(255, 255, 255, 0.65)!important;
 					}
 					.ant-popover-inner-content{
 						padding: 0!important;

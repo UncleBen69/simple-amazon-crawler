@@ -23,6 +23,7 @@
 		"electron-store": "^7.0.2",
 		"electron-updater": "^4.3.8",
 		"fastq": "^1.11.0",
+		"humanize-duration": "^3.25.1",
 		"jsonpack": "^1.1.5",
 		"papaparse": "^5.3.0",
 		"react-csv": "^2.0.3",

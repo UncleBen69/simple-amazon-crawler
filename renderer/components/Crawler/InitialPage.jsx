@@ -139,6 +139,7 @@ class InitialPage extends React.Component {
 						loading={this.props.loading}
 						defaultValue={this.props.url}
 						value="https://maternityglow.com/"
+						//value="https://broinsider.com/"
 					/>
 
 					<Divider />

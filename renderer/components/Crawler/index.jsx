@@ -30,6 +30,9 @@ class Crawler extends React.Component{
 			tags: [],
 			uniqueDomains: [],
 			host: null,
+
+			crawlRunTime: null,
+			expandRunTime: null,
 		};
 	}
 
@@ -51,7 +54,8 @@ class Crawler extends React.Component{
 				if(data.id !== this.props.id) return;
 
 				this.setState({
-					crawling: true
+					crawling: true,
+					crawlRunTime: Date.now()
 				});
 			});
 
@@ -61,7 +65,8 @@ class Crawler extends React.Component{
 				if(data.id !== this.props.id) return;
 				
 				this.setState({
-					loading: false
+					loading: false,
+					crawlRunTime: data.runTime
 				});
 
 				this.props.titleChange((
@@ -77,6 +82,10 @@ class Crawler extends React.Component{
 
 				for (let i = 0; i < data.tags.length; i++) {
 					const element = data.tags[i];
+
+					// Don't add blank element
+					if(element == null) continue;
+
 					arrayOfTags.push({
 						tag: element
 					});
@@ -151,6 +160,10 @@ class Crawler extends React.Component{
 
 				for (let i = 0; i < data.tags.length; i++) {
 					const element = data.tags[i];
+
+					// Don't add blank element
+					if(element == null) continue;
+
 					arrayOfTags.push({
 						tag: element
 					});
@@ -160,7 +173,8 @@ class Crawler extends React.Component{
 					loading: false,
 					amzurls: data.urls,
 					expanded: true,
-					tags: arrayOfTags
+					tags: arrayOfTags,
+					expandRunTime: data.runTime
 				});
 			});
 
@@ -217,7 +231,8 @@ class Crawler extends React.Component{
 
 		if(this.state.amzurls){
 			this.setState({
-				loading: true
+				loading: true,
+				expandRunTime: Date.now()
 			});
 			
 			this.props.titleChange((
@@ -232,14 +247,17 @@ class Crawler extends React.Component{
 				urls: this.state.amzurls,
 			};
 			console.log(data);
-			if (ipcRenderer) {
-				ipcRenderer.send("expand::submit", JSON.stringify(data));
-			}
+			
+			ipcRenderer.send("expand::submit", JSON.stringify(data));
 		}
 	}
 
 	reset = () => {
 		console.log("Reset");
+
+		// Reset Title
+		this.props.titleChange("New Crawler");
+
 		this.setState({
 			loading: false,
 			crawling: false,
@@ -253,6 +271,8 @@ class Crawler extends React.Component{
 			pageNumber: 0,
 			pages: [],
 			host: null,
+			crawlRunTime: null,
+			expandRunTime: null,
 		});	
 	}
 
@@ -274,6 +294,7 @@ class Crawler extends React.Component{
 				<WaitingSpinner 
 					id={this.props.id}
 					newPageNumber={this.newPageNumber}
+					crawlRunTime={this.state.crawlRunTime}
 				/>
 			);
 		}
@@ -289,6 +310,9 @@ class Crawler extends React.Component{
 					tags={this.state.tags}
 					uniqueDomainsArray={this.state.uniqueDomainsArray}
 					host={this.state.host}
+
+					crawlRunTime={this.state.crawlRunTime}
+					expandRunTime={this.state.expandRunTime}
 
 					reset={this.reset}
 					expandURLS={this.expandURLS}

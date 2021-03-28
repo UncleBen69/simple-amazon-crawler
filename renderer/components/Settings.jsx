@@ -56,11 +56,11 @@ class Settings extends React.Component{
 			setting.forEach(e => {
 				NewSettings[category][e.name] = e.value;
 			});
-		} else if(event){
+		} else if(event !== undefined){
 			// If input event
 			console.log("Event: ", event.target.value);
 			NewSettings[category][setting] = event.target.value;
-		} else if(value) {
+		} else if(value !== undefined) {
 			console.log("Force Value: ", value);
 			NewSettings[category][setting] = value;
 		}else{
@@ -75,7 +75,7 @@ class Settings extends React.Component{
 		});
 
 		// Update File
-		updateDebounced({NewSettings});
+		updateDebounced({...NewSettings});
 	}	
 
 	// Reset popover
@@ -237,6 +237,19 @@ class Settings extends React.Component{
 									checkedChildren={<CheckOutlined />}
 									unCheckedChildren={<CloseOutlined />}
 									onChange={()=> this.changeSetting("crawlerSettings", "scanSubdomains")}
+								/>
+							</Col>
+							
+							<Col flex={2}>
+								Crawl Images &amp; Media:
+							</Col>
+							<Col flex={"auto"} className="holdright">
+								<Switch
+									loading={!settings}
+									checked={settings !== null ? settings.crawlerSettings.downloadUnsupported : false}
+									checkedChildren={<CheckOutlined />}
+									unCheckedChildren={<CloseOutlined />}
+									onChange={()=> this.changeSetting("crawlerSettings", "downloadUnsupported")}
 								/>
 							</Col>
 

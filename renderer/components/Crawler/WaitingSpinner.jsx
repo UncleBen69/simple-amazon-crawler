@@ -1,13 +1,17 @@
 import electron from "electron";
 
 import React from "react";
+
+const humanizeDuration = require("humanize-duration");
+
 import {
 	Typography,
 	Spin,
-	Space,
+	Space
 } from "antd";
 
 const { Title } = Typography;
+
 
 import Console from "../Console";
 
@@ -19,7 +23,8 @@ class WaitingSpinner extends React.Component {
 		this.state = {
 			foundURL: "",
 			pages: [],
-			pageNumber: 0
+			pageNumber: 0,
+			time: null
 		};
 	}
 
@@ -46,9 +51,18 @@ class WaitingSpinner extends React.Component {
 				this.props.newPageNumber(this.state.pageNumber + 1);
 			});
 		}
+
+		this.interval = setInterval(() => this.setState({ 
+			time: Date.now() - this.props.crawlRunTime,
+		}), 50);
+	}
+
+	componentWillUnmount() {
+		clearInterval(this.interval);
 	}
 
 	render(){
+
 		return(
 			<>
 				<div className="container">
@@ -57,9 +71,10 @@ class WaitingSpinner extends React.Component {
 						<Spin size="large" />
 							
 						<Title level={3}>
-								Please wait while the site gets crawled
+							Please wait while the site gets crawled
 						</Title>
-							
+						
+						<Title level={5} >{humanizeDuration(this.state.time)}</Title>
 
 						<Title level={4}>On Page {this.state.pageNumber} :</Title>
 
