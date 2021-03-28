@@ -1,83 +1,68 @@
 import electron from "electron";
 const os = require("os");
 
-import AwesomeDebouncePromise from "awesome-debounce-promise";
+import Settings from "../../main/settings";
 
 import React from "react";
 
-import { Switch, Collapse, Row, Col, Input, Button, Space, Tooltip, InputNumber, Modal } from "antd";
-import { CloseOutlined, CheckOutlined, ReloadOutlined, ExclamationCircleOutlined, DashboardOutlined } from "@ant-design/icons";
+import { Switch, Collapse, Row, Col, Input, Button, Space, Tooltip, InputNumber, Modal, notification } from "antd";
+import { CloseOutlined, CheckOutlined, ReloadOutlined, ExclamationCircleOutlined, DashboardOutlined, CloudSyncOutlined, LoadingOutlined } from "@ant-design/icons";
 
 const { Panel } = Collapse;
 const { confirm } = Modal;
+const { TextArea } = Input;
+
 
 const ipcRenderer = electron.ipcRenderer || false;
-
-// Debouncing
-const UpdateFile = data => {
-	//console.log(data);
-	ipcRenderer.send("settings::update", JSON.stringify(data));
-};
-
-const updateDebounced = AwesomeDebouncePromise(UpdateFile, 250);
-
-
-class Settings extends React.Component{
+class SettingsPage extends React.Component{
 	constructor(props){
 		super(props);
 
 		this.state = {
 			version: "-.-.-",
-			settings: null,
+			settings: Settings.store,
 		};
 	}
 
 	componentDidMount() {
 		if (ipcRenderer) {
-			const settingsData = JSON.parse(ipcRenderer.sendSync("settings::get"));
-			console.log("Got: ",settingsData);
 			this.setState({
-				settings: settingsData,
 				version: ipcRenderer.sendSync("app::version"),
 			});
-			
 		}
 	}
 
 	changeSetting = (category, setting, event, value) =>{
 		console.log(category, setting, event, value);
 
-		let NewSettings = this.state.settings;
-
-		// If Debug option call props
-		if(setting === "debug") this.props.changeLogging();
+		let NewValue;
 
 		// Mass Change
-		if(Array.isArray(setting)){
-			console.log("Mass change: ", setting);
-			setting.forEach(e => {
-				NewSettings[category][e.name] = e.value;
-			});
-		} else if(event !== undefined){
+		if(event !== undefined){
 			// If input event
 			console.log("Event: ", event.target.value);
-			NewSettings[category][setting] = event.target.value;
+			NewValue = event.target.value;
 		} else if(value !== undefined) {
+			if(value == null) value = 0;
 			console.log("Force Value: ", value);
-			NewSettings[category][setting] = value;
+			NewValue = value;
 		}else{
 			console.log("No value provided, toggle");
-			NewSettings[category][setting] = !NewSettings[category][setting];
+			NewValue = !this.state.settings[category][setting];
 		}
 
-		console.log(NewSettings);
+		//console.log(NewSettings);
+	
+		Settings.set(`${category}.${setting}`, NewValue);
+
+		let NewSettings = this.state.settings;
+		
+		NewSettings[category][setting] = NewValue;
+
 
 		this.setState({
-			settings: NewSettings, 
+			settings: {...NewSettings}
 		});
-
-		// Update File
-		updateDebounced({...NewSettings});
 	}	
 
 	// Reset popover
@@ -90,9 +75,8 @@ class Settings extends React.Component{
 			okText: "Yes",
 			onOk(){
 				// Relaunch application
-				let	NewSettings = require("../defaultSettings.json");
 
-				ipcRenderer.send("settings::revert", JSON.stringify(NewSettings));
+				ipcRenderer.send("settings::revert");
 			},
 			onCancel() {
 				console.log("Cancel");
@@ -104,8 +88,8 @@ class Settings extends React.Component{
 
 	render(){
 		const { settings } = this.state;
-		//console.log(!settings);
-
+		console.log("Store: ", Settings.store);
+		
 		return(
 			<>
 				<Collapse accordion bordered={false}>
@@ -168,8 +152,27 @@ class Settings extends React.Component{
 								/>
 							</Col>
 
+							<Tooltip title="Check if there's newer versions available">
+								<Button 
+									loading={!settings}
+									type="primary" 
+									block
+									icon={<CloudSyncOutlined />} 
+									onClick={() => {
+										notification.info({
+											message: "Checking for updates",
+											icon: <LoadingOutlined />,
+											placement: "topLeft"
+										});
 
-							<Tooltip title="Reset all settings to defaults">
+										ipcRenderer.send("update::check");
+									}}
+								>
+									Check For Updates
+								</Button>
+							</Tooltip>
+
+							<Tooltip title="Reset all settings to defaults" placement="bottom">
 								<Button 
 									loading={!settings}
 									type="primary" 
@@ -310,7 +313,7 @@ class Settings extends React.Component{
 										onChange={(number)=> this.changeSetting("expandSettings", "parallel", undefined, number)}
 									/>
 
-									<Tooltip title="Set to best amount for hardware" placement="topRight">
+									<Tooltip title="Set to best amount for hardware (still testing)" placement="topRight">
 										<Button 
 											loading={!settings}
 											type="primary" 
@@ -323,7 +326,7 @@ class Settings extends React.Component{
 													"expandSettings", 
 													"parallel", 
 													undefined, 
-													cpuCount - 2
+													cpuCount - 1
 												);
 												
 											}}
@@ -331,7 +334,7 @@ class Settings extends React.Component{
 									</Tooltip>
 								</Space>
 							</Col>
-
+							
 						</Row>
 					</Panel>
 				</Collapse>
@@ -376,4 +379,11 @@ class Settings extends React.Component{
 	}
 }
 
-export default Settings;
+
+String.prototype.interpolate = function(params) {
+	const names = Object.keys(params);
+	const vals = Object.values(params);
+	return new Function(...names, `return \`${this}\`;`)(...vals);
+};
+
+export default SettingsPage;

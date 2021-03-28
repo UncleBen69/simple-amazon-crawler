@@ -2,6 +2,8 @@ import electron from "electron";
 
 import React from "react";
 
+import Settings from "../../main/settings";
+
 import Console from "./Console";
 
 const ipcRenderer = electron.ipcRenderer || false;
@@ -10,11 +12,20 @@ class DebugConsole extends React.Component{
 		super(props);
 
 		this.state = {
+			enabled: null,
 			logs: []
 		};
 	}
 
 	componentDidMount() {
+		this.setState({enabled: Settings.get("generalSettings.debug")});
+		
+		// Listen for updates to debug setting
+		Settings.onDidChange("generalSettings.debug", (newVal) => {
+			//console.log("Changed To", newVal);
+			this.setState({enabled: newVal});
+		});
+
 		if (ipcRenderer) {
 			ipcRenderer.on("debug::log", (event, arg) => {
 				let data = JSON.parse(arg);
@@ -41,9 +52,10 @@ class DebugConsole extends React.Component{
 
 	render(){
 		const {logs} = this.state;
+		//console.log("Console ", this.state.enabled);
 		return(
 			<>
-				<div className="bottomRightDebug" style={{ "display": this.props.enabled? "block" : "none"}}>
+				<div className="bottomRightDebug" style={{ "display": this.state.enabled ? "block" : "none"}}>
 					<Console data={logs} />
 				</div>
 

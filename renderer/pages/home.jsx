@@ -13,7 +13,7 @@ const { confirm } = Modal;
 
 
 import NewPage from "../components/newPage";
-import Settings from "../components/Settings";
+import SettingsPage from "../components/Settings";
 import DebugConsole from "../components/DebugConsole";
 
 
@@ -25,7 +25,6 @@ class Home extends React.Component {
 		this.newTabIndex = 0;
 
 		this.state = {
-			logging: null,
 			activeKey: 1,
 			panes: [
 				{
@@ -39,13 +38,6 @@ class Home extends React.Component {
 	
 	componentDidMount() {
 		if (ipcRenderer) {
-			
-			// Debug Settings
-			const settings = JSON.parse(ipcRenderer.sendSync("settings::get"));
-			this.setState({
-				logging: settings.generalSettings.debug,
-			});
-
 			ipcRenderer.on("update_available", () => {
 				ipcRenderer.removeAllListeners("update_available");
 				//message.innerText = "A new update is available. Downloading now...";
@@ -53,6 +45,7 @@ class Home extends React.Component {
 				notification.open({
 					message: "A new update is available. Downloading now...",
 					icon: <ExclamationCircleOutlined  style={{ color: "#108ee9" }} />,
+					placement: "topLeft"
 				});
 			});
 
@@ -67,7 +60,7 @@ class Home extends React.Component {
 					content: "Do you want to restart now?",
 					onOk() {
 						console.log("OK");
-						ipcRenderer.send("restart_app");
+						ipcRenderer.send("update::restart");
 					},
 					onCancel() {
 						console.log("Cancel");
@@ -76,16 +69,6 @@ class Home extends React.Component {
 
 			});
 		}
-	}
-
-	restartApp = () => {
-		ipcRenderer.send("restart_app");
-	}
-
-	changeLogging = () => {
-		this.setState(prevState => ({
-			logging: !prevState.logging
-		}));
 	}
 
 	onChange = activeKey => {
@@ -164,8 +147,8 @@ class Home extends React.Component {
 					tabBarExtraContent={
 						<Popover 
 							content={
-								<Settings 
-									changeLogging={this.changeLogging} 
+								<SettingsPage 
+									
 								/>
 							} 
 							title="Settings" 
@@ -184,7 +167,7 @@ class Home extends React.Component {
 				</Tabs>
 				
 				
-				<DebugConsole enabled={this.state.logging}/>
+				<DebugConsole />
 				
 
 				<style global jsx>{`

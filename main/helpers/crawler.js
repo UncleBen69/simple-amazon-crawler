@@ -1,5 +1,4 @@
-const { app, ipcMain } = require("electron");
-const fs = require("fs");
+const { ipcMain } = require("electron");
 import { logger } from "./index";
 
 var Crawler = require("simplecrawler");
@@ -7,14 +6,12 @@ var cheerio = require("cheerio");
 var URL = require("url");
 const { performance } = require("perf_hooks");
 
+import Settings from "../settings";
 
 export default function startCrawl(event, url, findURLS, id, window) {
 	let startTime, endTime;
 	
 	startTime = performance.now();
-	var { crawlerSettings } = JSON.parse(fs.readFileSync(`${app.getPath("userData")}/settings.json`));
-
-	logger(window, `${id} Settings: ${JSON.stringify(crawlerSettings)}`, "crawler");
 	
 	var crawler = new Crawler(url);
 
@@ -23,13 +20,13 @@ export default function startCrawl(event, url, findURLS, id, window) {
 	var url_found = [];
 
 	// Settings
-	crawler.stripQuerystring = crawlerSettings.stripQuerystring;
-	crawler.userAgent = crawlerSettings.userAgent;
-	crawler.respectRobotsTxt = crawlerSettings.respectRobotsTxt;
-	crawler.maxConcurrency = crawlerSettings.maxConcurrency;
-	crawler.scanSubdomains = crawlerSettings.scanSubdomains;
-	crawler.interval = crawlerSettings.interval; 
-	crawler.downloadUnsupported  = crawlerSettings.downloadUnsupported; 
+	crawler.stripQuerystring = Settings.get("crawlerSettings.stripQuerystring");
+	crawler.userAgent = Settings.get("crawlerSettings.userAgent");
+	crawler.respectRobotsTxt = Settings.get("crawlerSettings.respectRobotsTxt");
+	crawler.maxConcurrency = Settings.get("crawlerSettings.maxConcurrency");
+	crawler.scanSubdomains = Settings.get("crawlerSettings.scanSubdomains");
+	crawler.interval = Settings.get("crawlerSettings.interval"); 
+	crawler.downloadUnsupported  = Settings.get("crawlerSettings.downloadUnsupported"); 
 
 	crawler.on("crawlstart", function () {
 		logger(window, `${id} Crawl started on ${url}`, "crawler");

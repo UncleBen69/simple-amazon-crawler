@@ -1,10 +1,10 @@
-import electron from "electron";
-
 import React from "react";
 
 import { CSVLink } from "react-csv";
 
 import CustomTable from "./Table";
+
+import Settings from "../../../main/settings";
 
 const humanizeDuration = require("humanize-duration");
 
@@ -23,26 +23,22 @@ import { CloseOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
 
-const ipcRenderer = electron.ipcRenderer || false;
 class TableDisplay extends React.Component{
 	constructor(props){
 		super(props);
 
 		this.state = {
 			time: null,
-			rowsPerPage: 10
+			rowsPerPage: Settings.get("generalSettings.rowsPerPage"),
 		};
 	}
 
 	componentDidMount() {
-		if (ipcRenderer) {
-			// Row Settings
-			const settings = JSON.parse(ipcRenderer.sendSync("settings::get"));
-			console.log(settings.generalSettings.rowsPerPage, "Rows");
-			this.setState({
-				rowsPerPage: settings.generalSettings.rowsPerPage,
-			});
-		}
+		// Listen for updates to debug setting
+		Settings.onDidChange("generalSettings.rowsPerPage", (newVal) => {
+			//console.log("Changed To", newVal);
+			this.setState({rowsPerPage: newVal});
+		});
 	}
 
 	startExpand = ()=> {

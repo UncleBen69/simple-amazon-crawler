@@ -1,11 +1,12 @@
-const { app  } = require("electron");
-const fs = require("fs");
-const { Worker } = require("worker_threads");
+
+import ExpanderWorker from "!!raw-loader!../../expand-worker.js";
 
 import { logger } from "./index";
+const { Worker } = require("worker_threads");
 
 const { performance } = require("perf_hooks");
 
+import Settings from "../settings";
 
 var GlobalWindow;
 
@@ -13,13 +14,11 @@ export default async function expand(event, urls, id, window) {
 	let startTime, endTime;
 
 	startTime = performance.now();
-	var { expandSettings } = JSON.parse(fs.readFileSync(`${app.getPath("userData")}/settings.json`));
 	
 	GlobalWindow = window;
 
-
 	logger(GlobalWindow, `${id} Expand for urls: ${urls.length}`, "expander");
-	var queue = require("fastq")(worker, expandSettings.parallel);
+	var queue = require("fastq")(worker, Settings.get("expandSettings.parallel"));
 
 	let newurls = urls;
 	let amazon_tags = new Set();
@@ -95,9 +94,10 @@ function wait(newurls, callback){
 }
 
 function worker (options, cb) {
-	const worker = new Worker("./main/expand-worker.js", { workerData: options });
+	const worker = new Worker(ExpanderWorker, { workerData: options, eval: true});
 
 	worker.on("message", (message)=>{
+		//console.log(message);
 		if(message.type == "completed"){
 			const { data } = message;
 
